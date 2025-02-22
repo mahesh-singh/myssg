@@ -1,8 +1,13 @@
 
 ### next
-- [] parse content directory and generate the output in same dir structure
-- [] add template dir structure similar to content directory and use it while parsing
+- [] build posts index page
+- [] build home page 
 
+
+## feb/22
+- [X] parse content directory and generate the output in same dir structure
+- [X] add template dir structure similar to content directory and use it while parsing
+- 
 -----
 
 ## feb/19

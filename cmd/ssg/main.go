@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -13,7 +14,7 @@ import (
 	"github.com/yuin/goldmark"
 )
 
-type post struct {
+type Post struct {
 	Title   string
 	Date    string
 	Tags    []string
@@ -32,44 +33,50 @@ type Metadata struct {
 }
 
 func main() {
-	fmt.Print("this is my static site generator")
-
-	post, err := LoadMarkdownFiles("content/hello.md")
-
+	blogPosts, err := ParseBlogPosts("content/posts/")
 	if err != nil {
-		fmt.Printf("error while loading ghe markdown file: %v \n", err)
+		fmt.Printf("error while parsing blog posts: %v \n", err)
 		return
 	}
 
-	tmpl, err := template.ParseFiles("templates/base.html")
-	if err != nil {
-		fmt.Printf("error while parsing the template: %v \n", err)
+	if err := RenderBlogPosts(blogPosts, "templates/posts/post.html", "output/posts/"); err != nil {
+		fmt.Printf("error while rendering blog posts: %v \n", err)
 		return
 	}
-	var htmlContent strings.Builder
-	err = tmpl.Execute(&htmlContent, post)
-	if err != nil {
-		fmt.Printf("error while executing the template: %v \n", err)
-		return
-	}
-
-	outputPath := fmt.Sprintf("output/%s.html", post.Slug)
-	err = SaveToFile(outputPath, htmlContent.String())
-	if err != nil {
-		fmt.Printf("error while saving the file: %v \n", err)
-		return
-	}
-
-	fmt.Println((htmlContent.String()))
 }
 
-func LoadMarkdownFiles(filePath string) (*post, error) {
+func ParseBlogPosts(dir string) ([]Post, error) {
+	var posts []Post
+
+	files, err := filepath.Glob(filepath.Join(dir, "*.md"))
+	if err != nil {
+		return nil, err
+	}
+	fmt.Printf("filepath loaded count %d \n", len(files))
+	for _, file := range files {
+		post, err := LoadMarkdownFile(file)
+
+		if err != nil {
+			fmt.Printf("error while processing file %s: %v \n", file, err)
+			continue
+		}
+		if !post.Draft { // Skip drafts
+			posts = append(posts, *post)
+		}
+	}
+	fmt.Printf("generate posts count %d \n", len(posts))
+	return posts, nil
+}
+
+func LoadMarkdownFile(filePath string) (*Post, error) {
 	content, err := os.ReadFile(filePath)
 
 	if err != nil {
 		fmt.Printf("error wile loading the markdown content from file: %v \n", err)
 		return nil, err
 	}
+
+	fmt.Printf("markdown loaded from path %s, len of %d \n", filePath, len(content))
 
 	text := string(content)
 	metadata, markdown, err := ExtractMetadata(text)
@@ -78,9 +85,12 @@ func LoadMarkdownFiles(filePath string) (*post, error) {
 		return nil, err
 	}
 
+	fmt.Printf("meta data parsed for  %s \n", metadata.Title)
 	htmlContent := ConvertMarkdownToHTML(markdown)
 
-	return &post{
+	fmt.Printf("html generated for %s, len of %d \n", filePath, len(htmlContent))
+
+	return &Post{
 		Title:   metadata.Title,
 		Date:    metadata.Date.String(),
 		Tags:    metadata.Tags,
@@ -117,15 +127,37 @@ func ExtractMetadata(text string) (Metadata, string, error) {
 	err := toml.Unmarshal([]byte(tomlData), &metadata)
 
 	if err != nil {
-		return Metadata{}, "", fmt.Errorf("error parsing TOML metadata %v \n", err)
+		return Metadata{}, "", fmt.Errorf("error parsing TOML metadata %v", err)
 	}
 
 	return metadata, markdownContent, nil
 }
 
-func SaveToFile(filePath, content string) error {
-	if err := os.MkdirAll("output", os.ModePerm); err != nil {
-		return err
+func RenderBlogPosts(posts []Post, templatePath, outputDir string) error {
+	tmpl, err := template.ParseFiles("templates/base.html", templatePath)
+	fmt.Printf("loaded template %s \n", templatePath)
+	if err != nil {
+		return fmt.Errorf("error parsing template: %v", err)
 	}
-	return os.WriteFile(filePath, []byte(content), 0644)
+	fmt.Printf("loaded template %s \n", templatePath)
+
+	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+		return fmt.Errorf("error creating output directory: %v", err)
+	}
+
+	for _, post := range posts {
+		var htmlContent strings.Builder
+		if err := tmpl.ExecuteTemplate(&htmlContent, "base", post); err != nil {
+			fmt.Printf("error rendering post %s: %v \n", post.Slug, err)
+			continue
+		}
+		fmt.Printf("template executed for post %v of content %s \n", post, &htmlContent)
+		outputPath := filepath.Join(outputDir, post.Slug+".html")
+		if err := os.WriteFile(outputPath, []byte(htmlContent.String()), 0644); err != nil {
+			fmt.Printf("error saving file %s: %v \n", outputPath, err)
+		}
+		fmt.Printf("output generated %s \n", outputPath)
+	}
+
+	return nil
 }

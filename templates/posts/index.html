@@ -1,0 +1,13 @@
+{{define "main"}}
+<h2>Latest Snippets</h2>
+    {{if .Posts}}
+    <ul>
+        {{range .Posts}}
+            <li>{{.Title}}</li>
+        {{end}}
+    </ul>
+        
+    {{else}}
+    <p>There's nothing to see here yet!</p>
+    {{end}}
+{{end}}
