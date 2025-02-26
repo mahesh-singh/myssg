@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"html/template"
+	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -33,6 +35,12 @@ type Metadata struct {
 }
 
 func main() {
+
+	if err := RenderIndexPage("templates/index.html", "output"); err != nil {
+		fmt.Printf("error while rendering index page: %v \n", err)
+		return
+	}
+
 	blogPosts, err := ParseBlogPosts("content/posts/")
 	if err != nil {
 		fmt.Printf("error while parsing blog posts: %v \n", err)
@@ -41,6 +49,11 @@ func main() {
 
 	if err := RenderBlogPosts(blogPosts, "templates/posts/post.html", "output/posts/"); err != nil {
 		fmt.Printf("error while rendering blog posts: %v \n", err)
+		return
+	}
+
+	if err := CopyStaticFiles("templates/static", "output/static"); err != nil {
+		fmt.Printf("error while copy static: %v \n", err)
 		return
 	}
 }
@@ -134,7 +147,7 @@ func ExtractMetadata(text string) (Metadata, string, error) {
 }
 
 func RenderBlogPosts(posts []Post, templatePath, outputDir string) error {
-	tmpl, err := template.ParseFiles("templates/base.html", templatePath)
+	tmpl, err := template.ParseFiles("templates/base.html", "templates/partials/nav.html", templatePath)
 	fmt.Printf("loaded template %s \n", templatePath)
 	if err != nil {
 		return fmt.Errorf("error parsing template: %v", err)
@@ -159,5 +172,99 @@ func RenderBlogPosts(posts []Post, templatePath, outputDir string) error {
 		fmt.Printf("output generated %s \n", outputPath)
 	}
 
+	err = RenderBlogPostsIndex(posts, "templates/posts/index.html", outputDir)
+	if err != nil {
+		return fmt.Errorf("error rendering post index: %v", err)
+	}
+
 	return nil
+}
+
+func RenderBlogPostsIndex(posts []Post, templatePath string, outputDir string) error {
+	tmpl, err := template.ParseFiles("templates/base.html", "templates/partials/nav.html", templatePath)
+	if err != nil {
+		return fmt.Errorf("error parsing template: %v", err)
+	}
+
+	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+		return fmt.Errorf("error creating output directory: %v", err)
+	}
+
+	var htmlContent strings.Builder
+	if err := tmpl.ExecuteTemplate(&htmlContent, "base", posts); err != nil {
+		fmt.Printf("error rendering index of post %v \n", err)
+	}
+
+	outputPath := filepath.Join(outputDir, "index.html")
+
+	if err := os.WriteFile(outputPath, []byte(htmlContent.String()), 0644); err != nil {
+		fmt.Printf("error saving file %s: %v \n", outputPath, err)
+	}
+	return nil
+}
+
+func RenderIndexPage(templatePath string, outputDir string) error {
+	tmpl, err := template.ParseFiles("templates/base.html", "templates/partials/nav.html", templatePath)
+	if err != nil {
+		return fmt.Errorf("error parsing template: %v", err)
+	}
+
+	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
+		return fmt.Errorf("error creating output directory: %v", err)
+	}
+
+	var htmlContent strings.Builder
+	if err := tmpl.ExecuteTemplate(&htmlContent, "base", nil); err != nil {
+		fmt.Printf("error rendering index of post %v \n", err)
+	}
+
+	outputPath := filepath.Join(outputDir, "index.html")
+
+	if err := os.WriteFile(outputPath, []byte(htmlContent.String()), 0644); err != nil {
+		fmt.Printf("error saving file %s: %v \n", outputPath, err)
+	}
+	return nil
+}
+
+func CopyStaticFiles(srcDir, outputDir string) error {
+	err := filepath.WalkDir(srcDir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+
+		relPath, err := filepath.Rel(srcDir, path)
+		if err != nil {
+			return err
+		}
+
+		destPath := filepath.Join(outputDir, relPath)
+
+		if d.IsDir() {
+			return os.MkdirAll(destPath, os.ModePerm)
+		}
+
+		return CopyFile(path, destPath)
+	})
+
+	return err
+}
+
+func CopyFile(src, dest string) error {
+	srcFile, err := os.Open(src)
+	if err != nil {
+		return nil
+	}
+
+	defer srcFile.Close()
+
+	destFile, err := os.Create(dest)
+	if err != nil {
+		return nil
+	}
+	destFile.Close()
+
+	_, err = io.Copy(destFile, srcFile)
+
+	return err
+
 }
