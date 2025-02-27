@@ -4,11 +4,14 @@
 - [ ] Blog rolls
 - [ ] rss
 - [ ] Table of content with each post
+- [ ] 
 
 ### next
 - [ ] deploy on cloudflare 
-- [ ] 
-- [ ] 
+- [ ] basic design
+- [ ] Code block rendering
+- [ ] year vise folder in post and parsing it
+- [ ] fav.ico
 
 ---
 
