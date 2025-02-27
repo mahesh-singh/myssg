@@ -7,11 +7,15 @@
 - [ ] 
 
 ### next
-- [ ] deploy on cloudflare 
+
 - [ ] basic design
 - [ ] Code block rendering
 - [ ] year vise folder in post and parsing it
 - [ ] fav.ico
+
+-- 
+## feb/27
+- [X] deploy on cloudflare 
 
 ---
 
