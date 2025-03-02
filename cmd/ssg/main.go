@@ -65,7 +65,7 @@ func ParseBlogPosts(dir string) ([]Post, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Printf("filepath loaded count %d \n", len(files))
+
 	for _, file := range files {
 		post, err := LoadMarkdownFile(file)
 
@@ -77,7 +77,7 @@ func ParseBlogPosts(dir string) ([]Post, error) {
 			posts = append(posts, *post)
 		}
 	}
-	fmt.Printf("generate posts count %d \n", len(posts))
+
 	return posts, nil
 }
 
@@ -89,8 +89,6 @@ func LoadMarkdownFile(filePath string) (*Post, error) {
 		return nil, err
 	}
 
-	fmt.Printf("markdown loaded from path %s, len of %d \n", filePath, len(content))
-
 	text := string(content)
 	metadata, markdown, err := ExtractMetadata(text)
 
@@ -98,10 +96,7 @@ func LoadMarkdownFile(filePath string) (*Post, error) {
 		return nil, err
 	}
 
-	fmt.Printf("meta data parsed for  %s \n", metadata.Title)
 	htmlContent := ConvertMarkdownToHTML(markdown)
-
-	fmt.Printf("html generated for %s, len of %d \n", filePath, len(htmlContent))
 
 	return &Post{
 		Title:   metadata.Title,
@@ -148,11 +143,10 @@ func ExtractMetadata(text string) (Metadata, string, error) {
 
 func RenderBlogPosts(posts []Post, templatePath, outputDir string) error {
 	tmpl, err := template.ParseFiles("templates/base.html", "templates/partials/nav.html", templatePath)
-	fmt.Printf("loaded template %s \n", templatePath)
+
 	if err != nil {
 		return fmt.Errorf("error parsing template: %v", err)
 	}
-	fmt.Printf("loaded template %s \n", templatePath)
 
 	if err := os.MkdirAll(outputDir, os.ModePerm); err != nil {
 		return fmt.Errorf("error creating output directory: %v", err)
@@ -164,12 +158,12 @@ func RenderBlogPosts(posts []Post, templatePath, outputDir string) error {
 			fmt.Printf("error rendering post %s: %v \n", post.Slug, err)
 			continue
 		}
-		fmt.Printf("template executed for post %v of content %s \n", post, &htmlContent)
+
 		outputPath := filepath.Join(outputDir, post.Slug+".html")
 		if err := os.WriteFile(outputPath, []byte(htmlContent.String()), 0644); err != nil {
 			fmt.Printf("error saving file %s: %v \n", outputPath, err)
 		}
-		fmt.Printf("output generated %s \n", outputPath)
+
 	}
 
 	err = RenderBlogPostsIndex(posts, "templates/posts/index.html", outputDir)
@@ -261,7 +255,7 @@ func CopyFile(src, dest string) error {
 	if err != nil {
 		return nil
 	}
-	destFile.Close()
+	defer destFile.Close()
 
 	_, err = io.Copy(destFile, srcFile)
 
