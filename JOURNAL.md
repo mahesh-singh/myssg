@@ -7,11 +7,15 @@
 - [ ] 
 
 ### next
-
-- [ ] basic design
-- [ ] Code block rendering
+- [ ] post image handling 
+- [ ] social media integration
+- [ ] file watcher
 - [ ] year vise folder in post and parsing it
 - [ ] fav.ico
+
+# mar/02
+- [x] basic design
+- [x] Code block rendering
 
 -- 
 ## feb/27
