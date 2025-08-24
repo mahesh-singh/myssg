@@ -56,6 +56,11 @@ func main() {
 		fmt.Printf("error while copy static: %v \n", err)
 		return
 	}
+
+	if err := CopyStaticFiles("content/img", "output/img"); err != nil {
+		fmt.Printf("error while copy static: %v \n", err)
+		return
+	}
 }
 
 func ParseBlogPosts(dir string) ([]Post, error) {

@@ -21,6 +21,7 @@ draft = false
     - [Links](#links)
     - [Emphasis](#emphasis)
     - [Code](#code)
+    - [image](#image)
 
 
 **Note:** This document is itself written using Markdown; you
@@ -310,3 +311,7 @@ Unlike a pre-formatted code block, a code span indicates code within a
 normal paragraph. For example:
 
 Use the `printf()` function.
+
+### image
+
+![this is a image](../img/tux.png)

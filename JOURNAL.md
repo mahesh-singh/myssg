@@ -9,6 +9,7 @@
 ### next
 - [ ] post image handling 
 - [ ] social media integration
+- [ ] Index page, year/month/date vise post listing 
 - [ ] file watcher
 - [ ] year vise folder in post and parsing it
 - [ ] fav.ico
