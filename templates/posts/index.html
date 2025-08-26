@@ -1,9 +1,9 @@
 {{define "main"}}
-<h2>Latest Snippets</h2>
+<h2>Recent Posts</h2>
     {{if .}}
     <ul>
         {{range .}}
-            <li><a href="/posts/{{.Slug}}.html">{{.Title}}</a>  </li>
+            <li> {{.Date.Format "Jan/2/2006"}} <a href="/posts/{{.Slug}}.html">{{.Title}}</a>  </li>
         {{end}}
     </ul>
         

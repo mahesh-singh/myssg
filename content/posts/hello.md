@@ -1,6 +1,6 @@
 +++
 title = 'My First Post'
-date = 2024-01-14T07:07:07+01:00
+date = "2025-3-23"
 tags = ['react', 'go']
 slug = 'my-first-post'
 draft = false

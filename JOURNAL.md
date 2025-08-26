@@ -1,18 +1,25 @@
 
+ 
+
+### next
+- [ ] Index page, year/month/date vise post listing 
+- [ ] social media integration
+- [ ] fav.ico
+- [ ] 
+- [ ] file watcher
+- [ ] year vise folder in post and parsing it
+
+
+
 ## one day
 - [ ] TIL
 - [ ] Blog rolls
 - [ ] rss
 - [ ] Table of content with each post
-- [ ] 
+- [ ]
 
-### next
-- [ ] post image handling 
-- [ ] social media integration
-- [ ] Index page, year/month/date vise post listing 
-- [ ] file watcher
-- [ ] year vise folder in post and parsing it
-- [ ] fav.ico
+# aug/24
+- [X] post image handling 
 
 # mar/02
 - [x] basic design

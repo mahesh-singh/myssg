@@ -1,6 +1,6 @@
 +++
 title = 'My second Post'
-date = 2024-02-14T07:07:07+01:00
+date = "2025-4-25"
 tags = ['react', 'go']
 slug = 'my-second-post'
 draft = false

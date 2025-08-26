@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 	"time"
 
@@ -18,7 +19,7 @@ import (
 
 type Post struct {
 	Title   string
-	Date    string
+	Date    time.Time
 	Tags    []string
 	Content template.HTML
 	Summary string
@@ -27,11 +28,11 @@ type Post struct {
 }
 
 type Metadata struct {
-	Title string    `toml:"title"`
-	Date  time.Time `toml:"date"`
-	Tags  []string  `toml:"tags"`
-	Slug  string    `toml:"slug"`
-	Draft bool      `toml:"draft"`
+	Title string   `toml:"title"`
+	Date  string   `toml:"date"`
+	Tags  []string `toml:"tags"`
+	Slug  string   `toml:"slug"`
+	Draft bool     `toml:"draft"`
 }
 
 func main() {
@@ -83,6 +84,9 @@ func ParseBlogPosts(dir string) ([]Post, error) {
 		}
 	}
 
+	sort.Slice(posts, func(i, j int) bool {
+		return posts[i].Date.After(posts[j].Date)
+	})
 	return posts, nil
 }
 
@@ -103,9 +107,15 @@ func LoadMarkdownFile(filePath string) (*Post, error) {
 
 	htmlContent := ConvertMarkdownToHTML(markdown)
 
+	parsedTime, err := time.Parse("2006-1-2", metadata.Date)
+
+	if err != nil {
+		return nil, err
+	}
+
 	return &Post{
 		Title:   metadata.Title,
-		Date:    metadata.Date.String(),
+		Date:    parsedTime,
 		Tags:    metadata.Tags,
 		Content: htmlContent,
 		Slug:    metadata.Slug,
