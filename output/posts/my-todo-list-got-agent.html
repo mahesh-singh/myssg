@@ -1,0 +1,79 @@
+
+<!doctype html>
+<html lang='en'> 
+    <head>
+        <meta charset='utf-8'>
+        <title>Title</title> 
+        
+        <link rel='stylesheet' href='/static/css/style.css'>
+        
+        
+        
+    </head>
+    <body>
+        
+
+<nav>
+    <div>
+        <a href="/">Home</a> | 
+        <a href="/posts">Posts</a> | 
+        <a href="resume">Resume</a>
+    </div>
+</nav>
+
+
+        <main>
+            
+    
+        <p>
+            <h1>My TODO List Finally Got Agent (Hello World Agent)</h1>
+<p>Remember when your biggest productivity problem was remembering where you put that sticky note with &quot;do the code review&quot; written on it? Well, I've accidentally created something that makes that look like child's play. I built a todo list that talks back.</p>
+<p>I was hearing all about agents, I was thinking what could be a smallest agent hands-on I could built. I partially manage my running todo list and notes in a text file. Sometime list get too long and take long time to look for something specific or sometime I return after couple of days back.</p>
+<p>I was thinking what if I can have a conversation with it with the help of LLM. It took me about 300 lines of code to make this happen.</p>
+<h2>The Magic</h2>
+<p>Here's the weird thing about AI agents - they're basically just really smart middlemen. Think of it like this:</p>
+<ul>
+<li>You say something in human language</li>
+<li>The AI thinks &quot;hmm, they probably want me to read/write a file&quot;</li>
+<li>code calls a function to do that</li>
+<li>It tells you what happened in a nice way</li>
+</ul>
+<p>It's like having a translator who speaks both Human and Computer, except the translator is suspiciously good at understanding what you actually meant, not just what you said.</p>
+<h2>The Two Tools (function) That Rule Them All</h2>
+<p>My todo agent only knows how to do two things:</p>
+<ul>
+<li>Read todo files (because how else would it know what you wrote?)</li>
+<li>Edit todo files (because that's literally the point)</li>
+</ul>
+<p>That's it. Two functions. LLM figures out which tool (function) to use and when. Ask it &quot;What's on my list?&quot; and it knows to read the file. Say &quot;Add wash dishes to my todos&quot; and it knows to edit the file.</p>
+<h2>The Code</h2>
+<ol>
+<li>Need an anthropic key, go and get the key. I used $5</li>
+<li>First have a conversation</li>
+<li>Read the file</li>
+<li>Edit the file</li>
+<li>Create the file</li>
+</ol>
+<p>Lets start</p>
+<p>Here’s what we need:</p>
+<ul>
+<li>Go</li>
+<li>Anthropic API key that you set as an environment variable, ANTHROPIC_API_KEY</li>
+</ul>
+<p>Setup a new Go project</p>
+<pre><code>mkdir code-editing-agent
+cd code-editing-agent
+go mod init agent
+touch main.go
+</code></pre>
+<p>https://ampcode.com/how-to-build-an-agent</p>
+
+        </p>
+    
+
+        </main>
+        
+        
+        
+    </body>
+</html> 
