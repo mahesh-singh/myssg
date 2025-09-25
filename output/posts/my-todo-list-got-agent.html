@@ -27,52 +27,42 @@
     
         <p>
             <h1>My TODO List Finally Got Agent (Hello World Agent)</h1>
-<p>Remember when your biggest productivity problem was remembering where you put that sticky note with &quot;do the code review&quot; written on it? Well, I've accidentally created something that makes that look like child's play. I built a todo list that talks back.</p>
-<p>I was hearing all about agents, I was thinking what could be a smallest agent hands-on I could built. I partially manage my running todo list and notes in a text file. Sometime list get too long and take long time to look for something specific or sometime I return after couple of days back.</p>
-<p>I was thinking what if I can have a conversation with it with the help of LLM. It took me about 300 lines of code to make this happen.</p>
-<h2>The Magic</h2>
-<p>Here's the weird thing about AI agents - they're basically just really smart middlemen. Think of it like this:</p>
+<p>You know that feeling when your todo list becomes so long you spend more time searching for tasks than actually doing them? I had that exact problem. My running todo list lived in a simple text file, which worked fine until it didn't. Coming back after a few days away meant scrolling through endless bullet points trying to remember what was urgent.</p>
+<p>Then I heard everyone talking about AI agents. While others were building complex systems, I wondered: what's the smallest possible agent I could create that would actually solve my real problem?</p>
+<p>The answer surprised me. In just 300 lines of Go code, I built something that lets me have natural conversations with my todo list. No more hunting through text files—I just ask what's due tomorrow or tell it to add something new.</p>
+<h2>What Makes This Work</h2>
+<p>The secret isn't complex algorithms or fancy frameworks. An AI agent is fundamentally about bridging two worlds: human language and computer operations. When I say &quot;add wash dishes to my todos,&quot; the AI understands my intent and translates it into a file modification. When I ask &quot;what's on my list?&quot;, it knows to read the file and format the response nicely.</p>
+<p>This translation layer is where the magic happens. The LLM acts as an intelligent interpreter that can understand context, intent, and natural language, then decide which programmatic actions to take.</p>
+<h2>Two Simple Tools, Infinite Possibilities</h2>
+<p>My todo agent operates with just two capabilities:</p>
 <ul>
-<li>You say something in human language</li>
-<li>The AI thinks &quot;hmm, they probably want me to read/write a file&quot;</li>
-<li>code calls a function to do that</li>
-<li>It tells you what happened in a nice way</li>
+<li><strong>Reading todo files</strong> - How else would it know what I've written down?</li>
+<li><strong>Editing todo files</strong> - The whole point of any todo system</li>
 </ul>
-<p>It's like having a translator who speaks both Human and Computer, except the translator is suspiciously good at understanding what you actually meant, not just what you said.</p>
-<h2>The Two Tools (function) That Rule Them All</h2>
-<p>My todo agent only knows how to do two things:</p>
-<ul>
-<li>Read todo files (because how else would it know what you wrote?)</li>
-<li>Edit todo files (because that's literally the point)</li>
-</ul>
-<p>That's it. Two functions. LLM figures out which tool (function) to use and when. Ask it &quot;What's on my list?&quot; and it knows to read the file. Say &quot;Add wash dishes to my todos&quot; and it knows to edit the file.</p>
-<h2>The Code</h2>
-<ol>
-<li>Need an anthropic key, go and get the key. I used $5</li>
-<li>First have a conversation</li>
-<li>Read the file</li>
-<li>Edit the file</li>
-<li>Create the file</li>
-</ol>
+<p>That's the complete toolkit. The AI figures out when to use each tool based on our conversation. Ask &quot;What's on my list?&quot; and it reads. Say &quot;Add buy milk to my todos&quot; and it edits. The intelligence lies in this decision-making process.</p>
+<h2>Building It Step By Step</h2>
+<p>The implementation starts simple and grows incrementally. Here's how I approached it:</p>
+<h3>Prerequisites</h3>
 <p>Lets start</p>
-<p>We are going to use Golang, but you can use what you know, concept will be the same. We need one addition thing (Anthropic API key)[https://console.anthropic.com/settings/keys]. Once you get the API Key set on the env variable <code>ANTHROPIC_API_KEY</code></p>
+<p>You'll need an Anthropic API key from <a href="https://console.anthropic.com/settings/keys">console.anthropic.com</a>. Set it as an environment variable:</p>
 <pre><code>export ANTHROPIC_API_KEY=&quot;this is the last time i will tell you to set this&quot;
 </code></pre>
+<p>This key gives you access to Claude's capabilities. I purchase token worth $5 to experimenting and building this project.</p>
 <p>Every time you restart your terminal or machine, you need to set it again. This shouldn't be committed in git repo. It will cerate risk of exposing your API keys to others.</p>
-<p>Now setup a new Go project</p>
+<h3>Project Setup</h3>
 <pre><code>mkdir todo-agent
 cd todo-agent
 go mod init agent
 touch main.go
 </code></pre>
-<p>Here is high level structure of tasks we would like to achieve</p>
+<h3>Core Architecture</h3>
 <ul>
 <li>Establish back and fourth communication with Claude via integrating the API in our code</li>
 <li>Setting up first tool for reading the todo.txt file</li>
 <li>If todo.txt file doesn't exists, create the file</li>
 <li>Modify the todo.txt file based on users request</li>
 </ul>
-<p>Now, let’s open main.go and, as a first step</p>
+<p>The foundation is a conversation loop that maintains context across multiple exchanges:</p>
 <pre><code>package main
 
 import (
@@ -114,7 +104,7 @@ type Agent struct {
 	getUserMessage func() (string, bool)
 }
 </code></pre>
-<p>Now let’s add the missing Run() method:</p>
+<h3>The Conversation Engine</h3>
 <pre><code>// main.go
 
 func (a *Agent) Run(ctx context.Context) error {
@@ -160,8 +150,8 @@ func (a *Agent) askClaude(ctx context.Context, conversation []anthropic.MessageP
 }
 
 </code></pre>
-<p>Above code every AI chat application you’ve ever used, except it’s written by you and you are using it in the terminal.</p>
-<p>Now time to run it!</p>
+<p>This creates the basic chat interface. Each conversation turn builds on the previous context, allowing for natural, flowing interactions.</p>
+<h3>First Test Run</h3>
 <pre><code>export ANTHROPIC_API_KEY=&quot;this is the last time i will tell you to set this&quot;
 
 # Download the dependencies
@@ -169,12 +159,372 @@ go mod tidy
 # Run it
 go run main.go
 </code></pre>
+<p>Here's what a basic conversation looks like:</p>
 <pre><code>🤖 Todo Agent Ready! (Press Ctrl+C to quit)
 Try: what's on my todo list?
 You: Hey I am Mahesh, How are you?
 Claude: Hello Mahesh! I'm doing well, thank you for asking. How are you today? Is there something specific related to todo files that you'd like help with? I can help you read or edit todo files if you need assistance with that.
+You: What is my  Name
+Claude: Your name is Mahesh, as you mentioned in your introduction. Is there something specific you'd like help with regarding todo files? I can help you read or edit todo files using the available tools if needed.
+You: List three famous person with this name
+Claude: I'd be happy to tell you about three famous people with the name Mahesh, though I should note that I don't have access to a specific tool to look up this information. Based on general knowledge:
+
+1. Mahesh Babu - A very popular Indian film actor who works primarily in Telugu cinema. He's known for films like &quot;Pokiri,&quot; &quot;Dookudu,&quot; and &quot;Bharat Ane Nenu.&quot;
+
+2. Mahesh Bhatt - A well-known Indian film director, producer, and screenwriter who has directed critically acclaimed films like &quot;Arth,&quot; &quot;Saaransh,&quot; and &quot;Zakhm.&quot;
+
+3. Mahesh Bhupathi - A former professional tennis player from India who became the first Indian to win a Grand Slam tournament. He's known for his doubles expertise, having won numerous Grand Slam doubles titles.
+
+Is there anything specific about todo management you'd like help with? I can assist with reading or editing todo files using the available tools.
 </code></pre>
-<p>https://ampcode.com/how-to-build-an-agent</p>
+<p>The AI maintains conversational memory and stays focused on its primary purpose—helping with todo management.</p>
+<h2>Implementing the Read Tool</h2>
+<p>Tools are the bridge between conversation and action. Each tool needs four components:</p>
+<ul>
+<li><strong>Name and description</strong> - What the tool does and when to use it</li>
+<li><strong>Input schema</strong> - What parameters it expects</li>
+<li><strong>Execution function</strong> - The actual implementation</li>
+</ul>
+<p>Here's the complete tool infrastructure:</p>
+<pre><code>type ToolDefinition struct {
+	Name        string                         `json:&quot;name&quot;`
+	Description string                         `json:&quot;description&quot;`
+	InputSchema anthropic.ToolInputSchemaParam `json:&quot;input_schema&quot;`
+	Function    func(input json.RawMessage) (string, error)
+}
+</code></pre>
+<p>Update the Agent struct to include tools:</p>
+<pre><code>// `tools` is added here:
+type Agent struct {
+	client         *anthropic.Client
+	getUserMessage func() (string, bool)
+	tools          []ToolDefinition
+}
+
+// And here:
+func NewAgent(client *anthropic.Client,
+	getUserMessage func() (string, bool),
+	tools []ToolDefinition) *Agent {
+	return &amp;Agent{
+		client:         client,
+		getUserMessage: getUserMessage,
+		tools:          tools,
+	}
+}
+
+// And here:
+func main() {
+	client := anthropic.NewClient()
+
+	scanner := bufio.NewScanner(os.Stdin)
+
+	getUserMessage := func() (string, bool) {
+		if !scanner.Scan() {
+			return &quot;&quot;, false
+		}
+
+		return scanner.Text(), true
+	}
+
+	tools := []ToolDefinition{}
+
+	agent := NewAgent(&amp;client, getUserMessage, tools)
+	err := agent.Run(context.TODO())
+	if err != nil {
+		fmt.Printf(&quot;error: %s\n&quot;, err.Error())
+	}
+
+}
+</code></pre>
+<p>Integrate tools into the API call:</p>
+<pre><code>func (a *Agent) askClaude(ctx context.Context, conversation []anthropic.MessageParam) (*anthropic.Message, error) {
+
+	anthropicTools := []anthropic.ToolUnionParam{}
+
+	for _, tool := range a.tools {
+		anthropicTools = append(anthropicTools, anthropic.ToolUnionParam{
+			OfTool: &amp;anthropic.ToolParam{
+				Name:        tool.Name,
+				Description: anthropic.String(tool.Description),
+				InputSchema: tool.InputSchema,
+			},
+		})
+	}
+
+	message, err := a.client.Messages.New(ctx, anthropic.MessageNewParams{
+		Model:     anthropic.ModelClaude3_7SonnetLatest,
+		MaxTokens: int64(1024),
+		Messages:  conversation,
+		Tools:     anthropicTools,
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf(&quot;failed to create message: %w&quot;, err)
+	}
+
+	return message, err
+}
+
+</code></pre>
+<p>Now implement the read_todo tool:</p>
+<pre><code>var ReadToDoDefinition = ToolDefinition{
+	Name:        &quot;read_todo&quot;,
+	Description: &quot;Read the contents of a todo file (todo.txt) . Use this to see what's in the todo file.&quot;,
+	InputSchema: ReadToDoInputSchema,
+	Function:    ReadToDo,
+}
+
+type ReadToDoInput struct {
+	Path string `json:&quot;path&quot; jsonschema_description: &quot;Path to the todo file in current working directory (e.g., 'todo.txt')&quot;`
+}
+
+var ReadToDoInputSchema = GenerateSchema[ReadToDoInput]()
+
+func ReadToDo(input json.RawMessage) (string, error) {
+	readToDoInput := ReadToDoInput{}
+	err := json.Unmarshal(input, &amp;readToDoInput)
+
+	if err != nil {
+		panic(err)
+	}
+
+	content, err := os.ReadFile(readToDoInput.Path)
+
+	if err != nil {
+		return &quot;&quot;, fmt.Errorf(&quot;could not read file: %v&quot;, err)
+	}
+
+	return string(content), nil
+}
+
+func GenerateSchema[T any]() anthropic.ToolInputSchemaParam {
+	reflector := jsonschema.Reflector{
+		AllowAdditionalProperties: false,
+		DoNotReference:            true,
+	}
+
+	var v T
+	schema := reflector.Reflect(v)
+
+	return anthropic.ToolInputSchemaParam{
+		Properties: schema.Properties,
+	}
+}
+</code></pre>
+<p>Add the required import:</p>
+<pre><code>// main.go
+
+package main
+
+import (
+	&quot;bufio&quot;
+	&quot;context&quot;
+    // Add this:
+	&quot;encoding/json&quot;
+	&quot;fmt&quot;
+	&quot;os&quot;
+
+	&quot;github.com/anthropics/anthropic-sdk-go&quot;
+    // Add this:
+	&quot;github.com/invopop/jsonschema&quot;
+)
+</code></pre>
+<p>Install dependencies:</p>
+<pre><code>go mod tidy
+</code></pre>
+<p>Enable the tool in main:</p>
+<pre><code>func main() {
+    // [... previous code ...]
+    tools := []ToolDefinition{ReadToDoDefinition}
+    // [... previous code ...]
+}
+</code></pre>
+<h3>Testing the Read Functionality</h3>
+<p>Create a sample todo file:</p>
+<pre><code>touch todo.txt
+</code></pre>
+<p>and add few tasks in <code>todo.txt</code> like</p>
+<pre><code>- buy pencil from store
+- do code review of pull request #456
+- send email note to someone 
+</code></pre>
+<p>Test it:</p>
+<pre><code>go run main.go
+🤖 Todo Agent Ready! (Press Ctrl+C to quit)
+Try: 'add buy milk to my todo list' or 'what's on my todo list?'
+
+You: Whats in my todo list
+Claude: I'll help you check what's in your todo list. Let me retrieve that information for you.
+tool: read_todo({&quot;path&quot;:&quot;todo.txt&quot;})
+Claude: Here is what's currently in your todo list:
+1. Buy pencil from store
+2. Do code review of pull request #456
+3. Send email note to someone
+
+Is there anything specific you'd like to add, remove, or modify in your todo list?
+</code></pre>
+<p>The AI automatically decided to use the read_todo tool based on my natural language request. This demonstrates the power of letting the LLM determine when and how to use tools.</p>
+<h2>Adding Edit Capabilities</h2>
+<p>Reading is only half the story. The real power comes from being able to modify the todo list through conversation:</p>
+<p>We are going to use the same pattern as <code>read_todo</code>.</p>
+<ul>
+<li>Define  EditToDoScheme definition and EditToDoInput schema</li>
+<li><code>EditToDo</code> function which do the action</li>
+<li><code>createNewFile</code> create new todo.txt if needed</li>
+</ul>
+<pre><code>
+var EditToDoDefinition = ToolDefinition{
+	Name: &quot;edit_todo&quot;,
+	Description: `Edit a todo file by replacing old text with new text.
+	Replaces 'old_str' with 'new_str' in the given todo file. 'old_str' and 'new_str' MUST be different from each other.
+
+	If the file doesn't exist, it will be created.
+	`,
+	InputSchema: EditToDoInputSchema,
+	Function:    EditToDo,
+}
+
+type EditToDoInput struct {
+	Path   string `json:&quot;path&quot; jsonschema_description:&quot;The path to the todo file&quot;`
+	OldStr string `json:&quot;old_str&quot; jsonschema_description:&quot;Text to search for - must match exactly and must only have one match exactly&quot;`
+	NewStr string `json:&quot;new_str&quot; jsonschema_description:&quot;Text to replace old_str with&quot;`
+}
+
+var EditToDoInputSchema = GenerateSchema[EditToDoInput]()
+
+func EditToDo(input json.RawMessage) (string, error) {
+	editToDoInput := EditToDoInput{}
+
+	err := json.Unmarshal(input, &amp;editToDoInput)
+
+	if err != nil {
+		return &quot;&quot;, err
+	}
+
+	if editToDoInput.Path == &quot;&quot; || editToDoInput.OldStr == editToDoInput.NewStr {
+		return &quot;&quot;, fmt.Errorf(&quot;invalid input params&quot;)
+	}
+
+	content, err := os.ReadFile(editToDoInput.Path)
+
+	if err != nil {
+		if os.IsNotExist(err) &amp;&amp; editToDoInput.OldStr == &quot;&quot; {
+			return createNewFile(editToDoInput.Path, editToDoInput.NewStr)
+		}
+		return &quot;&quot;, err
+	}
+
+	oldContent := string(content)
+
+	newContent := strings.Replace(oldContent, editToDoInput.OldStr, editToDoInput.NewStr, -1)
+
+	if oldContent == newContent &amp;&amp; editToDoInput.OldStr != &quot;&quot; {
+		return &quot;&quot;, fmt.Errorf(&quot;old_str not found in file&quot;)
+	}
+
+	err = os.WriteFile(editToDoInput.Path, []byte(newContent), 0644)
+	if err != nil {
+		return &quot;&quot;, err
+	}
+
+	return &quot;OK&quot;, nil
+}
+
+func createNewFile(filePath, content string) (string, error) {
+	dir := path.Dir(filePath)
+	if dir != &quot;.&quot; {
+		err := os.MkdirAll(dir, 0755)
+		if err != nil {
+			return &quot;&quot;, fmt.Errorf(&quot;failed to create dir: %w&quot;, err)
+		}
+	}
+
+	err := os.WriteFile(filePath, []byte(content), 0644)
+	if err != nil {
+		return &quot;&quot;, fmt.Errorf(&quot;failed to create file: %w&quot;, err)
+	}
+
+	return fmt.Sprintf(&quot;Successfully created file %s&quot;, filePath), nil
+}
+</code></pre>
+<p>Add both tools to the agent:</p>
+<pre><code>// main.go
+
+func main() {
+	// [... previous code ...]
+
+	tools := []ToolDefinition{ReadToDoDefinition, EditToDoDefinition}
+
+	// [... previous code ...]
+}
+</code></pre>
+<h3>Testing the Complete System</h3>
+<p>Now the real magic happens:</p>
+<pre><code>go run main.go
+🤖 Todo Agent Ready! (Press Ctrl+C to quit)
+Try: 'add buy milk to my todo list' or 'what's on my todo list?'
+
+You: What's in my todo
+Claude: I'll help you check what's in your todo list. Let me retrieve the contents of your todo file.
+tool: read_todo({&quot;path&quot;:&quot;todo.txt&quot;})
+Claude: Here's what's in your todo list:
+- buy pencil from store
+- do code review of pull request #456
+- send email note to someone
+You: Add reply to matt's email
+Claude: I'll add &quot;reply to Matt's email&quot; to your todo list. Let me do that for you.
+
+First, I'll read the current contents of your todo file to know where to add the new item:
+tool: read_todo({&quot;path&quot;:&quot;todo.txt&quot;})
+Claude: Now I'll add your new todo item to the list:
+tool: edit_todo({&quot;path&quot;:&quot;todo.txt&quot;,&quot;old_str&quot;:&quot;- buy pencil from store\n- do code review of pull request #456\n- send email note to someone &quot;,&quot;new_str&quot;:&quot;- buy pencil from store\n- do code review of pull request #456\n- send email note to someone \n- reply to Matt's email&quot;})
+Claude: I've successfully added &quot;reply to Matt's email&quot; to your todo list. Your updated todo list now includes this new item.
+You: Now what's in my todo
+Claude: Let me check what's currently in your todo list:
+tool: read_todo({&quot;path&quot;:&quot;todo.txt&quot;})
+Claude: Here's what's in your todo list now:
+
+- buy pencil from store
+- do code review of pull request #456
+- send email note to someone
+- reply to Matt's email
+</code></pre>
+<p>The AI understood my intent to add a task, read the current file to understand the structure, then edited it appropriately. This multi-step reasoning happens automatically.</p>
+<h3>Advanced Interactions</h3>
+<p>The system handles complex requests naturally:</p>
+<pre><code>You: schedule by pencil due tomorrow
+Claude: I understand you want to set a due date for the pencil item on your todo list. Let me update it to indicate it's due tomorrow.
+
+First, let me read your current todo list:
+tool: read_todo({&quot;path&quot;:&quot;todo.txt&quot;})
+Claude: Now, let me update the pencil item to include the due date:
+tool: edit_todo({&quot;path&quot;:&quot;todo.txt&quot;,&quot;old_str&quot;:&quot;- buy pencil from store&quot;,&quot;new_str&quot;:&quot;- buy pencil from store (due tomorrow)&quot;})
+Claude: I've updated your todo list to indicate that buying a pencil is due tomorrow. The item now reads &quot;- buy pencil from store (due tomorrow)&quot;.
+You: now what's in my todo
+Claude: Let me check your current todo list for you:
+tool: read_todo({&quot;path&quot;:&quot;todo.txt&quot;})
+Claude: Here's what's currently in your todo list:
+
+- buy pencil from store (due tomorrow)
+- do code review of pull request #456
+- send email note to someone
+- reply to Matt's email
+</code></pre>
+<p>Even with a typo in my request (&quot;schedule by pencil&quot;), the AI understood my intent and correctly modified the task to include a due date.</p>
+<h3>Query-Based Interactions</h3>
+<p>The agent can answer specific questions about todo items:</p>
+<pre><code>You: What is due tomorrow
+Claude: Let me check your todo list and find what's due tomorrow:
+tool: read_todo({&quot;path&quot;:&quot;todo.txt&quot;})
+Claude: Based on your todo list, you have one item due tomorrow:
+- buy pencil from store (due tomorrow)
+</code></pre>
+<h2>The Power of Simplicity</h2>
+<p>What strikes me most about this project is how simple yet powerful it is. With just 300 lines of code and two basic operations (read and edit), I've created something that fundamentally changes how I interact with my todo list.</p>
+<p>The key insight is that the intelligence doesn't live in complex algorithms or elaborate frameworks. It lives in the LLM's ability to understand intent and translate it into appropriate actions. The agent layer just provides the mechanisms for that translation to happen.</p>
+<p>This opens up incredible possibilities. I could easily extend this to integrate with other todo apps through their APIs, add calendar functionality, or create entirely new interfaces. The conversational layer removes the friction between human intention and computer action.</p>
+<p>The models available today make this kind of natural language interface not just possible, but surprisingly straightforward to implement. We're witnessing a fundamental shift in how humans and computers can interact, and tools like this are just the beginning.</p>
+<p>Building this agent taught me that the future isn't necessarily about more complex software—it's about software that understands us better.</p>
 
         </p>
     
