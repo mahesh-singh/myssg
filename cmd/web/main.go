@@ -12,7 +12,7 @@ func main() {
 
 	http.Handle("/", fs)
 
-	port := 8080
+	port := 8082
 
 	fmt.Printf("server running at http://localhost:%d/\n", port)
 

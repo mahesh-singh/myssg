@@ -111,6 +111,8 @@
     font-family: 'Roboto Mono', monospace;
     color: #abb2bf;
     font-weight: 400;
+    white-space: pre-wrap; 
+    word-break: break-word;
   }
 
   pre {
